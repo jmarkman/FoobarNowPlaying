@@ -2,14 +2,23 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 
 namespace FoobarNowPlaying
 {
     public class NowPlayingViewModel : INotifyPropertyChanged
     {
-        private readonly string FoobarFilepath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "foobar2000", "foobar2000.exe");
+        private readonly string FoobarFilepath = 
+            Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
+                "foobar2000", 
+                "foobar2000.exe"
+                );
+
         private readonly int OneSecondDelayInMS = 1000;
 
         private string songName;
@@ -67,7 +76,42 @@ namespace FoobarNowPlaying
 
         private string FormatTrackTitleFromWindowTitle(Process process)
         {
-            throw new NotImplementedException();
+            Thread.Sleep(OneSecondDelayInMS);
+            process.Refresh();
+
+            string foobarWindowTitle = process.MainWindowTitle;
+
+            if (TitleIsAppName(foobarWindowTitle))
+            {
+                return string.Empty;
+            }
+
+            var splitTitle = 
+                Regex.Split(foobarWindowTitle, @"\s\|\s")
+                    .Select(segment => ProcessTitleSegment(segment))
+                    .ToList();
+
+            StringBuilder sb = new();
+            sb.AppendLine($"Track: {splitTitle[0]}");
+            sb.AppendLine($"Artist: {splitTitle[1]}");
+            sb.AppendLine($"Album: {splitTitle[2]}");
+
+            return sb.ToString();
+
+            string ProcessTitleSegment(string titleSegment)
+            {
+                if (titleSegment.Contains("foobar2000"))
+                {
+                    return Regex.Replace(titleSegment, @"\[foobar2000\]", "").Trim();
+                }
+
+                return titleSegment.Trim();
+            }
+
+            bool TitleIsAppName(string title)
+            {
+                return Regex.Match(title, @"foobar2000 v\d\.\d\.\d").Success;
+            }
         }
 
         #region INPC Implementation
