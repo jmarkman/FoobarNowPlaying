@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 
@@ -74,7 +73,7 @@ namespace FoobarNowPlaying
             }
         }
 
-        private string FormatTrackTitleFromWindowTitle(Process process)
+        private void FormatTrackTitleFromWindowTitle(Process process)
         {
             Thread.Sleep(OneSecondDelayInMS);
             process.Refresh();
@@ -83,7 +82,10 @@ namespace FoobarNowPlaying
 
             if (TitleIsAppName(foobarWindowTitle))
             {
-                return string.Empty;
+                SongName = string.Empty;
+                Artist = string.Empty;
+                Album = string.Empty;
+                return;
             }
 
             var splitTitle = 
@@ -91,12 +93,9 @@ namespace FoobarNowPlaying
                     .Select(segment => ProcessTitleSegment(segment))
                     .ToList();
 
-            StringBuilder sb = new();
-            sb.AppendLine($"Track: {splitTitle[0]}");
-            sb.AppendLine($"Artist: {splitTitle[1]}");
-            sb.AppendLine($"Album: {splitTitle[2]}");
-
-            return sb.ToString();
+            SongName = splitTitle[0];
+            Artist = splitTitle[1];
+            Album = splitTitle[2];
 
             string ProcessTitleSegment(string titleSegment)
             {
