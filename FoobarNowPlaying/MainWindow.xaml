@@ -5,8 +5,16 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FoobarNowPlaying"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="FoobarNowPlaying" Height="100" Width="300">
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
 
+        <TextBlock Grid.Row="0" Text="{Binding SongName}" />
+        <TextBlock Grid.Row="1" Text="{Binding Artist}" />
+        <TextBlock Grid.Row="2" Text="{Binding Album}" />
     </Grid>
 </Window>

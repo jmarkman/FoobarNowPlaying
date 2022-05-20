@@ -56,21 +56,29 @@ namespace FoobarNowPlaying
 
         public NowPlayingViewModel()
         {
-            using Process foobarProcess = new();
-            ProcessStartInfo startInfo = new()
+            new Thread(() =>
             {
-                FileName = FoobarFilepath
-            };
+                using Process foobarProcess = new();
+                ProcessStartInfo startInfo = new()
+                {
+                    FileName = FoobarFilepath
+                };
 
-            foobarProcess.StartInfo = startInfo;
-            foobarProcess.Start();
+                foobarProcess.StartInfo = startInfo;
+                foobarProcess.Start();
 
-            Thread.Sleep(OneSecondDelayInMS);
+                foobarProcess.WaitForInputIdle();
 
-            while (!foobarProcess.HasExited)
-            {
-                FormatTrackTitleFromWindowTitle(foobarProcess);
-            }
+                Thread.Sleep(OneSecondDelayInMS);
+
+                while (!foobarProcess.HasExited)
+                {
+                    FormatTrackTitleFromWindowTitle(foobarProcess);
+                }
+            })
+            { 
+                IsBackground = true
+            }.Start();
         }
 
         private void FormatTrackTitleFromWindowTitle(Process process)
@@ -80,7 +88,7 @@ namespace FoobarNowPlaying
 
             string foobarWindowTitle = process.MainWindowTitle;
 
-            if (TitleIsAppName(foobarWindowTitle))
+            if (TitleIsAppName(foobarWindowTitle) || string.IsNullOrEmpty(foobarWindowTitle))
             {
                 SongName = string.Empty;
                 Artist = string.Empty;
